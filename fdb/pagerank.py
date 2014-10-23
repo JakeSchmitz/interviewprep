@@ -1,3 +1,8 @@
+# This is a brief attempt to implement pagerank using fdb's key value store 
+# The intention was for this to be a localized pagerank to within a single domain
+# Some kinks need to be worked out. I don't really get scanning over namespaces 
+# or the particular access patterns for retrieving arrays stored as values
+
 import fdb
 import httplib2
 from BeautifulSoup import BeautifulSoup, SoupStrainer
@@ -12,11 +17,12 @@ pages = fdb.directory.create_or_open(db, ('pages',))
 # ranks subspace will have urls for keys, and floating point numbers for values
 ranks = pages.create_or_open(db, ('ranks',))
 
-
+# a Page is a url and all of it's outbound links
+# Ideally this could be stored in the k/v store with urls as keys and a list of links for a value
+# even better would be including the rank also, so the value is a tuple (list of links, rank) 
 class Page:
   def __init__(self, a):
     self.address = a
-    self.score = 0
     self.links = []
     try:
       # Try getting all links associated with address a
@@ -43,6 +49,7 @@ class Page:
     return str(self.cleanSubpages())
     
 
+# This drives the analysis, and also doesn't work
 class PageRanks:
   def scan(self, startPage='tufts.edu', depth=3):
     self.start = startPage
