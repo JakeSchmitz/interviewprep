@@ -65,12 +65,14 @@ class PageRanks:
       for p in set(filter(lambda t : self.root in str(t), page.dirtySubpages())):
         self.scanPage(p, remainingDepth - 1)
 
+  # This isn't working because I can't figure out the right access pattern to scan pages
   def initRanks(self):
     ps = []
-    for k in pages:
-      v = db[pages[k]]
-      print str(v)
+    # somehow scan the pages subspace
+    # currently failing because "too many values to unpack"
+    for k, v in pages:
       ps.append(k)
+    # Set each page's initial rank to 1/len(pages)
     num_pages = len(ps)
     for p in ps:
       db[ranks[p]] = bytes(1/num_pages)
@@ -90,7 +92,7 @@ class PageRanks:
           #Adjust ranks
           if l in newranks:
             newranks[l] = newranks[l] + (rank / len(good_links))
-          else newranks[l] = rank / len(good_lings)
+          else: newranks[l] = rank / len(good_lings)
       for k, v in newranks.iteritems():
         ranks[k] = v
 
@@ -98,3 +100,6 @@ pr = PageRanks()
 pr.scan('http://www.tufts.edu', 1)
 print 'Done scanning'
 pr.initRanks()
+
+# If compute ranks were working, we would call it here
+
